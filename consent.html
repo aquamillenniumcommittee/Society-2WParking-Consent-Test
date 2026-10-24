@@ -1,0 +1,134 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pre-Allocated Parking Consent | Aqua Millennium</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { font-family: Arial, sans-serif; }
+    .consent-container {
+      max-width: 760px;
+      margin: 24px auto;
+      padding: 20px;
+    }
+    .consent-card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .consent-card label {
+      display: block;
+      margin: 14px 0 6px;
+      font-weight: 600;
+    }
+    .consent-card input:not([type="checkbox"]) {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #aaa;
+      border-radius: 6px;
+    }
+    .slot-name { font-size: 26px; font-weight: bold; }
+    .terms-box {
+      max-height: 420px;
+      overflow-y: auto;
+      padding: 14px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+    .terms-box li { margin-bottom: 14px; line-height: 1.5; }
+    .agree-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      line-height: 1.5;
+      margin: 18px 0;
+    }
+    .agree-row input { margin-top: 4px; }
+    .consent-button {
+      padding: 12px 18px;
+      border: 0;
+      border-radius: 7px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .consent-button:disabled { opacity: .5; cursor: not-allowed; }
+    .consent-message { margin-top: 12px; overflow-wrap: anywhere; }
+    .hidden { display: none !important; }
+    .success { color: #166534; }
+    .error { color: #b91c1c; }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <div>
+    <div class="eyebrow">AQUA MILLENNIUM HOUSING SOCIETY</div>
+    <h1>Pre-Allocated Parking Consent</h1>
+  </div>
+</header>
+
+<main class="consent-container">
+  <section class="consent-card">
+    <h2>Verify your details</h2>
+    <p>For members with a pre-allocated two-wheeler parking slot only. This page records consent and does not change parking allocations.</p>
+
+    <form id="verifyForm">
+      <label for="flat">Flat number</label>
+      <input id="flat" autocomplete="off" placeholder="e.g. A-1204" required>
+
+      <label for="accessCode">Personal access code</label>
+      <input id="accessCode" autocomplete="off"
+             autocapitalize="characters" spellcheck="false" required>
+
+      <button class="consent-button primary" type="submit" id="verifyButton">
+        Verify my details
+      </button>
+      <p id="verifyMessage" class="consent-message" aria-live="polite"></p>
+    </form>
+  </section>
+
+  <section class="consent-card hidden" id="termsCard">
+    <h2>Your pre-allocated parking slot</h2>
+    <p>Flat: <strong id="verifiedFlat"></strong></p>
+    <p class="slot-name" id="verifiedSlot"></p>
+
+    <div class="terms-box">
+      <h3>Terms &amp; Conditions – 2-Wheeler Parking Slot</h3>
+      <ol>
+        <li><strong>Personal Selection:</strong> I confirm that I have personally selected the 2-Wheeler Parking Slot allotted/selected by me, with full knowledge and understanding of the location and circumstances of the selected slot.</li>
+        <li><strong>Voluntary Selection:</strong> I confirm that the selection has been made by me voluntarily and in my own discretion and consciousness. I have had the opportunity to inspect/understand the location of the selected slot before making my selection.</li>
+        <li><strong>Understanding of Location:</strong> I confirm that I have had the opportunity to inspect and understand the location of the selected slot before making my selection.</li>
+        <li><strong>Responsibility for Selection:</strong> I acknowledge and accept that the responsibility for the selection made by me rests solely with me.</li>
+        <li><strong>No Liability for Consequences of Selection:</strong> I acknowledge and accept that Aqua Millennium Housing Society / Managing Committee, its office bearers, or any individual associated with the parking slot selection process shall not be held responsible or liable for any consequences, inconvenience, difficulty, or concerns arising out of the parking slot selected by me.</li>
+        <li><strong>No Claim or Dispute Regarding Selection:</strong> I agree that I shall not raise any claim, objection, or dispute against the Society/Managing Committee or any individual on account of my selection.</li>
+        <li><strong>No Physical Alterations or Modifications:</strong> I confirm that no physical alterations or modifications of any kind, including the installation of any shade or covering, shall be made to the allocated parking slot.</li>
+        <li><strong>Acknowledgement and Acceptance:</strong> By clicking “I Agree &amp; Confirm Selection”, I confirm that I have read, understood and accepted the above Terms &amp; Conditions.</li>
+      </ol>
+    </div>
+
+    <form id="consentForm">
+      <label class="agree-row" for="agreeTerms">
+        <input id="agreeTerms" type="checkbox" required>
+        <span>I have read, understood and agree to the above Terms &amp; Conditions (version v1.1).</span>
+      </label>
+
+      <button class="consent-button primary" id="submitButton"
+              type="submit" disabled>
+        I Agree &amp; Submit
+      </button>
+      <p id="submitMessage" class="consent-message" aria-live="polite"></p>
+    </form>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="consent.js"></script>
+</body>
+</html>
