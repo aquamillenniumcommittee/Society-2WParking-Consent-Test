@@ -2,12 +2,12 @@
 document.addEventListener("DOMContentLoaded", () => {
   const $ = (id) => document.getElementById(id);
 
-  const form = $("consentForm");
-  const flatInput = $("flatNumber");
+  const form = $("verifyForm");
+  const flatInput = $("flat");
   const codeInput = $("accessCode");
   const agreeInput = $("agreeTerms");
-  const submitButton = $("submitButton");
-  const statusBox = $("consentStatus");
+  const submitButton = $("verifyButton");
+  const statusBox = $("verifyMessage");
 
   function showStatus(message, isError = false) {
     if (statusBox) {
@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (!form) {
-    console.error("Consent form not found. Check the form ID in consent.html.");
+    alert("The form could not be found. Please contact the committee.");
     return;
   }
 
@@ -28,16 +28,15 @@ document.addEventListener("DOMContentLoaded", () => {
     event.preventDefault();
 
     const flat = (flatInput?.value || "").trim();
-    const memberCode = (codeInput?.value || "").trim();
-    const agreed = Boolean(agreeInput?.checked);
+    const code = (codeInput?.value || "").trim();
 
-    if (!flat || !memberCode) {
+    if (!flat || !code) {
       showStatus("Please enter your flat number and access code.", true);
       return;
     }
 
-    if (!agreed) {
-      showStatus("Please read and accept the Terms and Conditions.", true);
+    if (!agreeInput?.checked) {
+      showStatus("Please accept the Terms and Conditions.", true);
       return;
     }
 
@@ -46,10 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
       !window.SUPABASE_URL ||
       !window.SUPABASE_ANON_KEY
     ) {
-      showStatus(
-        "The page configuration is incomplete. Please contact the committee.",
-        true
-      );
+      showStatus("The Supabase configuration is missing.", true);
       return;
     }
 
@@ -64,85 +60,70 @@ document.addEventListener("DOMContentLoaded", () => {
         window.SUPABASE_ANON_KEY
       );
 
-      // Verify the member using the existing login function.
       const { data: loginData, error: loginError } =
         await client.rpc("member_login", {
           p_flat: flat,
-          p_code: memberCode
+          p_code: code
         });
 
       if (loginError) {
         throw new Error(
-          "We could not verify your details. Please check them and try again."
+          "Member verification failed. Please check your details or contact the committee."
         );
       }
 
-      // The existing function may return an object or a single-row array.
       const member = Array.isArray(loginData)
         ? loginData[0]
         : loginData;
 
       if (!member || typeof member !== "object") {
-        throw new Error(
-          "We could not verify your member details. Please contact the committee."
-        );
+        throw new Error("The login response could not be read.");
       }
 
-      // Support common response field names.
-      const preallocatedSlot =
+      const slot =
         member.pre_allocated_slot ??
         member.preallocated_slot ??
         member.preallocatedSlot;
 
-      if (!preallocatedSlot) {
+      if (!slot) {
         throw new Error(
-          "This flat does not appear to have a pre-allocated parking slot. Please contact the committee."
+          "No pre-allocated slot was found for this flat."
         );
       }
 
-      // Record acceptance in the separate consent table.
-      const { data: consentData, error: consentError } =
+      const { data: result, error: consentError } =
         await client.rpc("submit_preallocated_consent", {
           p_flat: flat,
-          p_code: memberCode,
+          p_code: code,
           p_agree: true
         });
 
       if (consentError) {
         throw new Error(
-          "Your acceptance could not be recorded. Please try again or contact the committee."
+          "Acceptance could not be recorded. Please contact the committee."
         );
       }
 
-      const result = Array.isArray(consentData)
-        ? consentData[0]
-        : consentData;
+      const response = Array.isArray(result) ? result[0] : result;
 
-      if (!result || result.ok !== true) {
-        throw new Error(
-          "The system did not confirm your acceptance. Please contact the committee."
-        );
+      if (!response || response.ok !== true) {
+        throw new Error("The system did not confirm the acceptance.");
       }
 
       showStatus(
-        result.already_accepted
-          ? "Your acceptance of the Terms and Conditions is already recorded."
-          : "Thank you. Your acceptance of the Terms and Conditions has been recorded successfully."
+        response.already_accepted
+          ? "Your acceptance is already recorded."
+          : "Thank you. Your acceptance has been recorded successfully."
       );
 
       form.reset();
-
     } catch (error) {
-      console.error("Consent submission failed:", error);
-      showStatus(
-        error.message ||
-          "Something went wrong. Please try again or contact the committee.",
-        true
-      );
+      console.error("Consent submission error:", error);
+      showStatus(error.message || "Something went wrong.", true);
     } finally {
       if (submitButton) {
         submitButton.disabled = false;
-        submitButton.textContent = "I Agree & Submit";
+        submitButton.textContent = "Verify my details";
       }
     }
   });
